@@ -1,0 +1,8 @@
+<svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="192" height="192" rx="24" fill="#667eea"/>
+  <rect x="24" y="24" width="144" height="144" rx="16" fill="white"/>
+  <circle cx="96" cy="80" r="20" fill="#667eea"/>
+  <rect x="60" y="120" width="72" height="8" rx="4" fill="#667eea"/>
+  <rect x="60" y="136" width="48" height="8" rx="4" fill="#667eea"/>
+  <text x="96" y="180" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#667eea">SME</text>
+</svg>
