@@ -88,7 +88,7 @@ const EditDashboardForm = ({ dashboard, onClose, onSuccess }) => {
                 onClose();
             }
         } catch (error) {
-            console.error('Error updating dashboard:', error);
+            // console.error('Error updating dashboard:', error);
             setErrors({ submit: error || 'Failed to update dashboard' });
         } finally {
             setIsSubmitting(false);

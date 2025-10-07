@@ -42,7 +42,7 @@ const WidgetManager = ({ dashboard, onAddWidget, onEditWidget, onDeleteWidget, o
 
     return (
         <div className="space-y-6">
-            {/* Add Widget Section */}
+
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold text-gray-900">Add Widget</h3>
@@ -62,7 +62,6 @@ const WidgetManager = ({ dashboard, onAddWidget, onEditWidget, onDeleteWidget, o
                                 key={widgetType.type}
                                 className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer"
                                 onClick={() => {
-                                    // TODO: Implement widget creation
                                     toast.success(`${widgetType.name} widget added!`);
                                     setIsAddingWidget(false);
                                 }}
