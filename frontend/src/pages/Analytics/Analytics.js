@@ -179,16 +179,19 @@ const Analytics = () => {
                         <SalesChart
                             data={safeAnalyticsData.sales || []}
                             onDrillDown={handleDrillDown}
+                            timeRange={selectedTimeRange}
                         />
 
                         <InventoryChart
                             data={safeAnalyticsData.inventory || []}
                             onDrillDown={handleDrillDown}
+                            timeRange={selectedTimeRange}
                         />
 
                         <CustomerFeedbackChart
                             data={safeAnalyticsData.feedback || []}
                             onDrillDown={handleDrillDown}
+                            timeRange={selectedTimeRange}
                         />
                     </>
                 )}

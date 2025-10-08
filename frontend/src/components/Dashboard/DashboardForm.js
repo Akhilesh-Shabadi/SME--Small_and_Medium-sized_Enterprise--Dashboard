@@ -82,7 +82,7 @@ const DashboardForm = ({ onClose, onSuccess }) => {
                 onClose();
             }
         } catch (error) {
-            // console.error('Error creating dashboard:', error);
+            console.error('Error creating dashboard:', error);
             setErrors({ submit: error || 'Failed to create dashboard' });
         } finally {
             setIsSubmitting(false);

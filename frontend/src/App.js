@@ -8,6 +8,7 @@ import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
 import Dashboard from './pages/Dashboard/Dashboard';
 import DashboardView from './pages/Dashboard/DashboardView';
+import DataSources from './pages/DataSources/DataSources';
 import Analytics from './pages/Analytics/Analytics';
 import Collaboration from './pages/Collaboration/Collaboration';
 import Alerts from './pages/Alerts/Alerts';
@@ -70,6 +71,7 @@ function App() {
                     <Route index element={<Navigate to="/dashboard" replace />} />
                     <Route path="dashboard" element={<Dashboard />} />
                     <Route path="dashboard/:id" element={<DashboardView />} />
+                    <Route path="data-sources" element={<DataSources />} />
                     <Route path="analytics" element={<Analytics />} />
                     <Route path="collaboration" element={<Collaboration />} />
                     <Route path="alerts" element={<Alerts />} />

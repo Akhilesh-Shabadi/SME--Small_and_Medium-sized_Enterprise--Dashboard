@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import ChartContainer from './ChartContainer';
 import { ExclamationTriangleIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 
-const InventoryChart = ({ data = [], onDrillDown }) => {
+const InventoryChart = ({ data = [], onDrillDown, timeRange = '7d' }) => {
     const [drillDownData, setDrillDownData] = useState(null);
     const [isDrilledDown, setIsDrilledDown] = useState(false);
     const [drillDownTitle, setDrillDownTitle] = useState('');
@@ -10,15 +10,30 @@ const InventoryChart = ({ data = [], onDrillDown }) => {
     // Process inventory data
     const chartData = useMemo(() => {
         if (!data || data.length === 0) {
-            // Generate sample inventory data
-            return [
-                { name: 'Product A', value: 45, minStock: 20, maxStock: 100, status: 'low' },
-                { name: 'Product B', value: 85, minStock: 30, maxStock: 150, status: 'good' },
-                { name: 'Product C', value: 12, minStock: 25, maxStock: 80, status: 'critical' },
-                { name: 'Product D', value: 120, minStock: 40, maxStock: 200, status: 'good' },
-                { name: 'Product E', value: 8, minStock: 15, maxStock: 60, status: 'critical' },
-                { name: 'Product F', value: 65, minStock: 35, maxStock: 120, status: 'good' }
+            // Generate sample inventory data with proper names
+            const productNames = [
+                'Laptop Pro', 'Wireless Mouse', 'USB-C Cable', 'Bluetooth Headphones',
+                'Mechanical Keyboard', 'Monitor Stand', 'Webcam HD', 'Power Bank',
+                'Tablet Case', 'Screen Protector', 'Laptop Charger', 'Gaming Mouse'
             ];
+
+            return productNames.slice(0, 6).map((name, index) => {
+                const value = Math.floor(Math.random() * 100) + 10;
+                const minStock = Math.floor(value * 0.3);
+                const maxStock = Math.floor(value * 1.5);
+                let status = 'good';
+
+                if (value < minStock * 1.2) status = 'critical';
+                else if (value < minStock * 1.5) status = 'low';
+
+                return {
+                    name,
+                    value,
+                    minStock,
+                    maxStock,
+                    status
+                };
+            });
         }
         return data;
     }, [data]);
@@ -42,11 +57,12 @@ const InventoryChart = ({ data = [], onDrillDown }) => {
 
     const generateInventoryHistory = (product) => {
         // Simulate 30 days of inventory history
+        const baseValue = isNaN(product.value) ? 0 : product.value;
         return Array.from({ length: 30 }, (_, i) => ({
             name: `Day ${i + 1}`,
-            value: Math.max(0, product.value + Math.floor(Math.random() * 20) - 10),
-            minStock: product.minStock,
-            maxStock: product.maxStock,
+            value: Math.max(0, baseValue + Math.floor(Math.random() * 20) - 10),
+            minStock: product.minStock || 0,
+            maxStock: product.maxStock || 100,
             date: new Date(Date.now() - (29 - i) * 24 * 60 * 60 * 1000).toISOString()
         }));
     };
@@ -54,13 +70,13 @@ const InventoryChart = ({ data = [], onDrillDown }) => {
     const inventoryStats = useMemo(() => {
         const lowStock = chartData.filter(item => item.status === 'low' || item.status === 'critical').length;
         const totalProducts = chartData.length;
-        const averageStock = chartData.reduce((sum, item) => sum + item.value, 0) / totalProducts;
+        const averageStock = totalProducts > 0 ? chartData.reduce((sum, item) => sum + (item.value || 0), 0) / totalProducts : 0;
 
         return {
             lowStock,
             totalProducts,
-            averageStock: Math.round(averageStock),
-            lowStockPercentage: Math.round((lowStock / totalProducts) * 100)
+            averageStock: Math.round(averageStock || 0),
+            lowStockPercentage: totalProducts > 0 ? Math.round((lowStock / totalProducts) * 100) : 0
         };
     }, [chartData]);
 
@@ -179,10 +195,10 @@ const InventoryChart = ({ data = [], onDrillDown }) => {
                                     <div className="w-24 bg-gray-200 rounded-full h-2">
                                         <div
                                             className={`h-2 rounded-full ${product.status === 'critical' ? 'bg-red-500' :
-                                                    product.status === 'low' ? 'bg-yellow-500' : 'bg-green-500'
+                                                product.status === 'low' ? 'bg-yellow-500' : 'bg-green-500'
                                                 }`}
                                             style={{
-                                                width: `${Math.min(100, (product.value / product.maxStock) * 100)}%`
+                                                width: `${Math.min(100, product.maxStock > 0 ? (product.value / product.maxStock) * 100 : 0)}%`
                                             }}
                                         />
                                     </div>

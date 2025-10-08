@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import ChartContainer from './ChartContainer';
 import { StarIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 
-const CustomerFeedbackChart = ({ data = [], onDrillDown }) => {
+const CustomerFeedbackChart = ({ data = [], onDrillDown, timeRange = '7d' }) => {
     const [drillDownData, setDrillDownData] = useState(null);
     const [isDrilledDown, setIsDrilledDown] = useState(false);
     const [drillDownTitle, setDrillDownTitle] = useState('');

@@ -44,23 +44,23 @@ const DashboardView = () => {
     };
 
     const handleAddWidget = () => {
-        // TODO: Implement add widget functionality
-        console.log('Add widget');
+        // WidgetManager handles this internally
+        console.log('Add widget triggered');
     };
 
     const handleEditWidget = (widget) => {
-        // TODO: Implement edit widget functionality
-        console.log('Edit widget:', widget);
+        // WidgetManager handles this internally
+        console.log('Edit widget triggered:', widget);
     };
 
     const handleDeleteWidget = (widget) => {
-        // TODO: Implement delete widget functionality
-        console.log('Delete widget:', widget);
+        // WidgetManager handles this internally
+        console.log('Delete widget triggered:', widget);
     };
 
     const handleConfigureWidget = (widget) => {
-        // TODO: Implement configure widget functionality
-        console.log('Configure widget:', widget);
+        // WidgetManager handles this internally
+        console.log('Configure widget triggered:', widget);
     };
 
     if (isLoading) {

@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import ChartContainer from './ChartContainer';
 import { format, subDays } from 'date-fns';
 
-const SalesChart = ({ data = [], onDrillDown }) => {
+const SalesChart = ({ data = [], onDrillDown, timeRange = '7d' }) => {
     const [drillDownData, setDrillDownData] = useState(null);
     const [isDrilledDown, setIsDrilledDown] = useState(false);
     const [drillDownTitle, setDrillDownTitle] = useState('');
@@ -10,16 +10,45 @@ const SalesChart = ({ data = [], onDrillDown }) => {
     // Process data for different time periods
     const chartData = useMemo(() => {
         if (!data || data.length === 0) {
-            // Generate sample data for demonstration
-            return Array.from({ length: 7 }, (_, i) => ({
-                name: format(subDays(new Date(), 6 - i), 'MMM dd'),
-                value: Math.floor(Math.random() * 1000) + 500,
-                date: subDays(new Date(), 6 - i).toISOString(),
-                category: 'All Products'
-            }));
+            // Generate sample data based on time range
+            const getDaysFromTimeRange = (range) => {
+                switch (range) {
+                    case '1d': return 24; // 24 hours
+                    case '7d': return 7;
+                    case '30d': return 30;
+                    case '90d': return 90;
+                    case '1y': return 12; // 12 months
+                    default: return 7;
+                }
+            };
+
+            const days = getDaysFromTimeRange(timeRange);
+            const isHourly = timeRange === '1d';
+            const isMonthly = timeRange === '1y';
+
+            return Array.from({ length: days }, (_, i) => {
+                let date, name;
+                if (isHourly) {
+                    date = new Date(Date.now() - (days - 1 - i) * 60 * 60 * 1000);
+                    name = format(date, 'HH:mm');
+                } else if (isMonthly) {
+                    date = subDays(new Date(), (days - 1 - i) * 30);
+                    name = format(date, 'MMM yyyy');
+                } else {
+                    date = subDays(new Date(), days - 1 - i);
+                    name = format(date, 'MMM dd');
+                }
+
+                return {
+                    name,
+                    value: Math.floor(Math.random() * 1000) + 500,
+                    date: date.toISOString(),
+                    category: 'All Products'
+                };
+            });
         }
         return data;
-    }, [data]);
+    }, [data, timeRange]);
 
     const handleDrillDown = (clickedData) => {
         if (!onDrillDown) return;
@@ -36,6 +65,21 @@ const SalesChart = ({ data = [], onDrillDown }) => {
         setDrillDownData(null);
         setIsDrilledDown(false);
         setDrillDownTitle('');
+    };
+
+    // Generate dynamic title based on time range
+    const getChartTitle = () => {
+        if (isDrilledDown) return drillDownTitle;
+
+        const timeRangeLabels = {
+            '1d': 'Last 24 Hours',
+            '7d': 'Last 7 Days',
+            '30d': 'Last 30 Days',
+            '90d': 'Last 90 Days',
+            '1y': 'Last Year'
+        };
+
+        return `Sales Trend (${timeRangeLabels[timeRange] || 'Last 7 Days'})`;
     };
 
     const generateDrillDownData = (parentData) => {
@@ -108,7 +152,7 @@ const SalesChart = ({ data = [], onDrillDown }) => {
 
             {/* Chart */}
             <ChartContainer
-                title={isDrilledDown ? drillDownTitle : "Sales Trend (Last 7 Days)"}
+                title={getChartTitle()}
                 data={chartData}
                 type="bar"
                 height={400}

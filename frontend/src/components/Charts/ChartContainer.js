@@ -50,8 +50,19 @@ const ChartContainer = ({
     }, []);
 
     const renderChart = () => {
+        // Clean data to ensure no NaN values
+        const cleanData = (dataArray) => {
+            if (!Array.isArray(dataArray)) return [];
+            return dataArray.map(item => ({
+                ...item,
+                value: isNaN(item.value) ? 0 : item.value,
+                name: item.name || 'Unknown'
+            }));
+        };
+
+        const chartData = isDrilledDown ? drillDownData : data;
         const chartProps = {
-            data: isDrilledDown ? drillDownData : data,
+            data: cleanData(chartData),
             margin: { top: 20, right: 30, left: 20, bottom: 5 },
             onClick: handleDataClick,
             onMouseEnter: handleMouseEnter,
@@ -153,7 +164,7 @@ const ChartContainer = ({
                     <div className="flex items-center space-x-2">
                         {hoveredData && (
                             <div className="text-sm text-gray-600">
-                                {hoveredData.name}: {hoveredData.value}
+                                {hoveredData.name}: {isNaN(hoveredData.value) ? 'N/A' : hoveredData.value}
                             </div>
                         )}
 
@@ -197,7 +208,9 @@ const ChartContainer = ({
                                     className="w-3 h-3 rounded"
                                     style={{ backgroundColor: item.color || '#3b82f6' }}
                                 />
-                                <span className="text-sm text-gray-600">{item.name}</span>
+                                <span className="text-sm text-gray-600">
+                                    {item.name || 'Unknown'}: {isNaN(item.value) ? 'N/A' : item.value}
+                                </span>
                             </div>
                         ))}
                     </div>

@@ -8,6 +8,7 @@ import {
     BellIcon,
     CogIcon,
     XMarkIcon,
+    ServerIcon,
 } from '@heroicons/react/24/outline';
 import { toggleSidebar } from '../../store/slices/uiSlice';
 
@@ -18,6 +19,7 @@ const Sidebar = () => {
 
     const navigation = [
         { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+        { name: 'Data Sources', href: '/data-sources', icon: ServerIcon },
         { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
         { name: 'Collaboration', href: '/collaboration', icon: UsersIcon },
         { name: 'Alerts', href: '/alerts', icon: BellIcon },

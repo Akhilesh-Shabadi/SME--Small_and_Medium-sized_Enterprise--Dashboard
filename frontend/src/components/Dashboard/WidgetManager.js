@@ -1,35 +1,84 @@
 import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { PlusIcon, PencilIcon, TrashIcon, Cog6ToothIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
+import WidgetForm from './WidgetForm';
+import WidgetConfigModal from './WidgetConfigModal';
+import WidgetPreview from './WidgetPreview';
+import { deleteWidget } from '../../store/slices/widgetSlice';
 
 const WidgetManager = ({ dashboard, onAddWidget, onEditWidget, onDeleteWidget, onConfigureWidget }) => {
+    const dispatch = useDispatch();
+    const { isLoading } = useSelector((state) => state.widget);
     const [isAddingWidget, setIsAddingWidget] = useState(false);
+    const [showWidgetForm, setShowWidgetForm] = useState(false);
+    const [showConfigModal, setShowConfigModal] = useState(false);
+    const [selectedWidget, setSelectedWidget] = useState(null);
+    const [editingWidget, setEditingWidget] = useState(null);
 
     const handleAddWidget = () => {
         setIsAddingWidget(true);
+        setShowWidgetForm(true);
         if (onAddWidget) {
             onAddWidget();
         }
     };
 
     const handleEditWidget = (widget) => {
+        setEditingWidget(widget);
+        setShowWidgetForm(true);
         if (onEditWidget) {
             onEditWidget(widget);
         }
     };
 
-    const handleDeleteWidget = (widget) => {
+    const handleDeleteWidget = async (widget) => {
         if (window.confirm('Are you sure you want to delete this widget?')) {
-            if (onDeleteWidget) {
-                onDeleteWidget(widget);
+            try {
+                await dispatch(deleteWidget(widget.id)).unwrap();
+                toast.success('Widget deleted successfully');
+                if (onDeleteWidget) {
+                    onDeleteWidget(widget);
+                }
+            } catch (error) {
+                toast.error('Failed to delete widget');
+                console.error('Error deleting widget:', error);
             }
         }
     };
 
     const handleConfigureWidget = (widget) => {
+        setSelectedWidget(widget);
+        setShowConfigModal(true);
         if (onConfigureWidget) {
             onConfigureWidget(widget);
         }
+    };
+
+    const handleWidgetFormSuccess = () => {
+        setShowWidgetForm(false);
+        setEditingWidget(null);
+        setIsAddingWidget(false);
+        // Refresh dashboard data
+        window.location.reload();
+    };
+
+    const handleConfigSuccess = () => {
+        setShowConfigModal(false);
+        setSelectedWidget(null);
+        // Refresh dashboard data
+        window.location.reload();
+    };
+
+    const handleCloseWidgetForm = () => {
+        setShowWidgetForm(false);
+        setEditingWidget(null);
+        setIsAddingWidget(false);
+    };
+
+    const handleCloseConfigModal = () => {
+        setShowConfigModal(false);
+        setSelectedWidget(null);
     };
 
     const widgetTypes = [
@@ -42,7 +91,7 @@ const WidgetManager = ({ dashboard, onAddWidget, onEditWidget, onDeleteWidget, o
 
     return (
         <div className="space-y-6">
-
+            {/* Add Widget Section */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold text-gray-900">Add Widget</h3>
@@ -62,8 +111,12 @@ const WidgetManager = ({ dashboard, onAddWidget, onEditWidget, onDeleteWidget, o
                                 key={widgetType.type}
                                 className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer"
                                 onClick={() => {
-                                    toast.success(`${widgetType.name} widget added!`);
-                                    setIsAddingWidget(false);
+                                    setEditingWidget({
+                                        type: widgetType.type,
+                                        title: `New ${widgetType.name}`,
+                                        description: widgetType.description
+                                    });
+                                    setShowWidgetForm(true);
                                 }}
                             >
                                 <h4 className="font-medium text-gray-900 mb-2">
@@ -127,9 +180,7 @@ const WidgetManager = ({ dashboard, onAddWidget, onEditWidget, onDeleteWidget, o
                                 </div>
 
                                 {/* Widget Preview */}
-                                <div className="bg-gray-50 rounded p-3 text-center text-sm text-gray-500">
-                                    Widget Preview
-                                </div>
+                                <WidgetPreview widget={widget} />
                             </div>
                         ))}
                     </div>
@@ -147,6 +198,23 @@ const WidgetManager = ({ dashboard, onAddWidget, onEditWidget, onDeleteWidget, o
                     </p>
                 </div>
             )}
+
+            {/* Widget Form Modal */}
+            <WidgetForm
+                isOpen={showWidgetForm}
+                onClose={handleCloseWidgetForm}
+                dashboardId={dashboard?.id}
+                widget={editingWidget}
+                onSuccess={handleWidgetFormSuccess}
+            />
+
+            {/* Widget Configuration Modal */}
+            <WidgetConfigModal
+                isOpen={showConfigModal}
+                onClose={handleCloseConfigModal}
+                widget={selectedWidget}
+                onSuccess={handleConfigSuccess}
+            />
         </div>
     );
 };

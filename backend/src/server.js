@@ -22,6 +22,8 @@ const logger = require('./utils/logger');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const dashboardRoutes = require('./routes/dashboard');
+const widgetRoutes = require('./routes/widgets');
+const dataSourceRoutes = require('./routes/dataSources');
 const analyticsRoutes = require('./routes/analytics');
 const collaborationRoutes = require('./routes/collaboration');
 const alertRoutes = require('./routes/alerts');
@@ -114,6 +116,8 @@ app.get('/logo512.png', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/widget', widgetRoutes);
+app.use('/api/data-sources', dataSourceRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/collaboration', collaborationRoutes);
 app.use('/api/alerts', alertRoutes);

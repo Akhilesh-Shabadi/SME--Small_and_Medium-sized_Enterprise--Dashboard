@@ -32,6 +32,7 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
+        // Only handle 401 errors for token refresh, not 403 (permission) errors
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
 
@@ -51,14 +52,20 @@ api.interceptors.response.use(
                     return api(originalRequest);
                 }
             } catch (refreshError) {
-                // Refresh failed, redirect to login
+                // Refresh failed, clear auth and redirect to login
                 localStorage.removeItem('token');
                 localStorage.removeItem('refreshToken');
-                window.location.href = '/login';
+
+                // Only redirect if we're not already on the login page
+                if (window.location.pathname !== '/login') {
+                    window.location.href = '/login';
+                }
                 return Promise.reject(refreshError);
             }
         }
 
+        // For 403 errors (permission denied), don't redirect to login
+        // For other errors, also don't redirect automatically
         return Promise.reject(error);
     }
 );

@@ -8,6 +8,7 @@ const EditDashboardModal = ({ isOpen, onClose, onSuccess, dashboard }) => {
         if (isOpen) {
             setIsVisible(true);
         } else {
+            // Add a small delay for smooth animation
             const timer = setTimeout(() => setIsVisible(false), 150);
             return () => clearTimeout(timer);
         }

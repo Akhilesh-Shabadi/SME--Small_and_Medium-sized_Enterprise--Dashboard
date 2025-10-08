@@ -14,6 +14,10 @@ const DashboardCard = ({ dashboard, onJoin, onEdit }) => {
         return null;
     }
 
+    // Debug logging
+    console.log('DashboardCard - dashboard:', dashboard);
+    console.log('DashboardCard - dashboard.createdBy:', dashboard.createdBy);
+
     const handleJoin = () => {
         if (onJoin) {
             onJoin();
