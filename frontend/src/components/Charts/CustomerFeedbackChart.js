@@ -12,11 +12,11 @@ const CustomerFeedbackChart = ({ data = [], onDrillDown, timeRange = '7d' }) => 
         if (!data || data.length === 0) {
             // Generate sample feedback data
             return [
-                { name: '5 Stars', value: 45, rating: 5, sentiment: 'positive' },
-                { name: '4 Stars', value: 30, rating: 4, sentiment: 'positive' },
-                { name: '3 Stars', value: 15, rating: 3, sentiment: 'neutral' },
-                { name: '2 Stars', value: 7, rating: 2, sentiment: 'negative' },
-                { name: '1 Star', value: 3, rating: 1, sentiment: 'negative' }
+                { name: '5 Stars', value: 45, rating: 5, sentiment: 'positive', color: '#10b981' },
+                { name: '4 Stars', value: 30, rating: 4, sentiment: 'positive', color: '#3b82f6' },
+                { name: '3 Stars', value: 15, rating: 3, sentiment: 'neutral', color: '#f59e0b' },
+                { name: '2 Stars', value: 7, rating: 2, sentiment: 'negative', color: '#ef4444' },
+                { name: '1 Star', value: 3, rating: 1, sentiment: 'negative', color: '#8b5cf6' }
             ];
         }
         return data;
@@ -30,7 +30,7 @@ const CustomerFeedbackChart = ({ data = [], onDrillDown, timeRange = '7d' }) => 
 
         setDrillDownData(drillDown);
         setIsDrilledDown(true);
-        setDrillDownTitle(`${clickedData.name} - Detailed Feedback`);
+        setDrillDownTitle(`${clickedData.name || 'Selected Rating'} - Detailed Feedback`);
     };
 
     const handleBack = () => {

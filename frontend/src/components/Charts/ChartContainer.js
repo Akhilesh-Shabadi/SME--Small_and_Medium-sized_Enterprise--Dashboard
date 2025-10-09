@@ -49,18 +49,19 @@ const ChartContainer = ({
         setHoveredData(null);
     }, []);
 
-    const renderChart = () => {
-        // Clean data to ensure no NaN values
-        const cleanData = (dataArray) => {
-            if (!Array.isArray(dataArray)) return [];
-            return dataArray.map(item => ({
-                ...item,
-                value: isNaN(item.value) ? 0 : item.value,
-                name: item.name || 'Unknown'
-            }));
-        };
+    // Clean data to ensure no NaN values
+    const cleanData = (dataArray) => {
+        if (!Array.isArray(dataArray) || dataArray.length === 0) return [];
+        return dataArray.map((item, index) => ({
+            ...item,
+            value: isNaN(item.value) ? 0 : item.value,
+            name: item.name || `Item ${index + 1}`
+        }));
+    };
 
-        const chartData = isDrilledDown ? drillDownData : data;
+    const chartData = isDrilledDown ? drillDownData : data;
+
+    const renderChart = () => {
         const chartProps = {
             data: cleanData(chartData),
             margin: { top: 20, right: 30, left: 20, bottom: 5 },
@@ -107,20 +108,32 @@ const ChartContainer = ({
 
             case 'pie':
                 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+                const pieData = cleanData(chartData);
+
+                // Ensure we have data to display
+                if (!pieData || pieData.length === 0) {
+                    return (
+                        <div className="flex items-center justify-center h-full text-gray-500">
+                            No data available
+                        </div>
+                    );
+                }
+
                 return (
                     <PieChart {...chartProps}>
                         <Pie
-                            data={chartProps.data}
+                            data={pieData}
                             cx="50%"
                             cy="50%"
                             labelLine={false}
                             label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                            outerRadius={80}
+                            outerRadius={100}
+                            innerRadius={20}
                             fill="#8884d8"
                             dataKey="value"
                         >
-                            {chartProps.data.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            {pieData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.color || COLORS[index % COLORS.length]} />
                             ))}
                         </Pie>
                         <Tooltip />
@@ -164,7 +177,7 @@ const ChartContainer = ({
                     <div className="flex items-center space-x-2">
                         {hoveredData && (
                             <div className="text-sm text-gray-600">
-                                {hoveredData.name}: {isNaN(hoveredData.value) ? 'N/A' : hoveredData.value}
+                                {hoveredData.name}: {isNaN(hoveredData.value) ? '0' : hoveredData.value.toLocaleString()}
                             </div>
                         )}
 
@@ -202,14 +215,14 @@ const ChartContainer = ({
                 {/* Chart Configuration */}
                 {config.showLegend && (
                     <div className="mt-4 flex flex-wrap gap-2">
-                        {data.map((item, index) => (
+                        {cleanData(chartData).map((item, index) => (
                             <div key={index} className="flex items-center space-x-2">
                                 <div
                                     className="w-3 h-3 rounded"
                                     style={{ backgroundColor: item.color || '#3b82f6' }}
                                 />
                                 <span className="text-sm text-gray-600">
-                                    {item.name || 'Unknown'}: {isNaN(item.value) ? 'N/A' : item.value}
+                                    {item.name || 'Unknown'}: {isNaN(item.value) ? '0' : item.value.toLocaleString()}
                                 </span>
                             </div>
                         ))}

@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
+import { useDispatch } from 'react-redux';
+import { alertService } from '../../services/alertService';
+import { setLoading, setError } from '../../store/slices/alertSlice';
 import {
     PencilIcon,
     TrashIcon,
@@ -19,14 +22,17 @@ const AlertItem = ({
     onEdit,
     onCancelEdit
 }) => {
+    const dispatch = useDispatch();
     const [editData, setEditData] = useState({
         title: alert.title,
         message: alert.message,
         severity: alert.severity,
         isActive: alert.isActive
     });
+    const [isUpdating, setIsUpdating] = useState(false);
 
     const getSeverityIcon = (severity) => {
+        if (!severity) return <InformationCircleIcon className="h-5 w-5 text-gray-500" />;
         switch (severity) {
             case 'critical': return <XCircleIcon className="h-5 w-5 text-red-500" />;
             case 'high': return <ExclamationTriangleIcon className="h-5 w-5 text-orange-500" />;
@@ -37,6 +43,7 @@ const AlertItem = ({
     };
 
     const getSeverityColor = (severity) => {
+        if (!severity) return 'bg-gray-100 text-gray-800 border-gray-200';
         switch (severity) {
             case 'critical': return 'bg-red-100 text-red-800 border-red-200';
             case 'high': return 'bg-orange-100 text-orange-800 border-orange-200';
@@ -46,7 +53,7 @@ const AlertItem = ({
         }
     };
 
-    const handleUpdate = () => {
+    const handleUpdate = async () => {
         const updateData = {
             title: editData.title.trim(),
             message: editData.message.trim(),
@@ -54,21 +61,53 @@ const AlertItem = ({
             isActive: editData.isActive
         };
 
-        if (updateData.title && updateData.title !== alert.title) {
-            onUpdate(alert.id, updateData);
-        } else {
+        if (!updateData.title) {
+            dispatch(setError('Title is required'));
+            return;
+        }
+
+        try {
+            setIsUpdating(true);
+            dispatch(setLoading(true));
+
+            const response = await alertService.updateAlert(alert.id, updateData);
+            onUpdate(alert.id, response.data.alert);
             onCancelEdit();
+        } catch (error) {
+            dispatch(setError('Failed to update alert'));
+            console.error('Error updating alert:', error);
+        } finally {
+            setIsUpdating(false);
+            dispatch(setLoading(false));
         }
     };
 
-    const handleDelete = () => {
+    const handleDelete = async () => {
         if (window.confirm('Are you sure you want to delete this alert?')) {
-            onDelete(alert.id);
+            try {
+                dispatch(setLoading(true));
+                await alertService.deleteAlert(alert.id);
+                onDelete(alert.id);
+            } catch (error) {
+                dispatch(setError('Failed to delete alert'));
+                console.error('Error deleting alert:', error);
+            } finally {
+                dispatch(setLoading(false));
+            }
         }
     };
 
-    const handleAcknowledge = () => {
-        onAcknowledge(alert.id);
+    const handleAcknowledge = async () => {
+        try {
+            dispatch(setLoading(true));
+            await alertService.acknowledgeAlert(alert.id);
+            onAcknowledge(alert.id);
+        } catch (error) {
+            dispatch(setError('Failed to acknowledge alert'));
+            console.error('Error acknowledging alert:', error);
+        } finally {
+            dispatch(setLoading(false));
+        }
     };
 
     return (
@@ -135,9 +174,10 @@ const AlertItem = ({
                         </button>
                         <button
                             onClick={handleUpdate}
-                            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                            disabled={isUpdating}
+                            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
                         >
-                            Save
+                            {isUpdating ? 'Saving...' : 'Save'}
                         </button>
                     </div>
                 </div>
@@ -154,7 +194,7 @@ const AlertItem = ({
 
                         <div className="flex items-center space-x-2 ml-4">
                             <span className={`px-2 py-1 text-xs font-medium rounded-full ${getSeverityColor(alert.severity)}`}>
-                                {alert.severity.toUpperCase()}
+                                {alert.severity?.toUpperCase() || 'UNKNOWN'}
                             </span>
                             {alert.isTriggered && (
                                 <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">

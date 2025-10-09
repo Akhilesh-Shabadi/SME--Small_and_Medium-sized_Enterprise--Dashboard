@@ -1,7 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { useDispatch, useSelector } from 'react-redux';
+import { alertService } from '../../services/alertService';
+import { setLoading, setError } from '../../store/slices/alertSlice';
 
 const AlertForm = ({ onSubmit, onCancel }) => {
+    const dispatch = useDispatch();
+    const { isLoading, error } = useSelector((state) => state.alert);
+    const [dataSources, setDataSources] = useState([]);
     const [conditionData, setConditionData] = useState({
         metric: '',
         operator: 'greater_than',
@@ -19,30 +25,67 @@ const AlertForm = ({ onSubmit, onCancel }) => {
 
     const alertType = watch('type', 'threshold');
 
-    const handleFormSubmit = (data) => {
-        const condition = {
-            ...conditionData,
-            metric: data.metric,
-            operator: data.operator,
-            value: parseFloat(data.value),
-            timeWindow: data.timeWindow
+    // Fetch data sources on component mount
+    useEffect(() => {
+        const fetchDataSources = async () => {
+            try {
+                dispatch(setLoading(true));
+                const response = await alertService.getDataSources();
+                setDataSources(response.data.dataSources || []);
+            } catch (error) {
+                console.error('Error fetching data sources:', error);
+                // Set mock data sources for development when backend is not available
+                const mockDataSources = [
+                    { id: 'sales-ds', name: 'Sales Data', type: 'sales' },
+                    { id: 'inventory-ds', name: 'Inventory Data', type: 'inventory' },
+                    { id: 'feedback-ds', name: 'Customer Feedback', type: 'feedback' }
+                ];
+                setDataSources(mockDataSources);
+            } finally {
+                dispatch(setLoading(false));
+            }
         };
 
-        onSubmit({
-            dataSourceId: data.dataSourceId,
-            type: data.type,
-            title: data.title,
-            message: data.message,
-            severity: data.severity,
-            condition
-        });
-        reset();
-        setConditionData({
-            metric: '',
-            operator: 'greater_than',
-            value: '',
-            timeWindow: '1h'
-        });
+        fetchDataSources();
+    }, [dispatch]);
+
+    const handleFormSubmit = async (data) => {
+        try {
+            dispatch(setLoading(true));
+            dispatch(setError(null));
+
+            const condition = {
+                ...conditionData,
+                metric: data.metric,
+                operator: data.operator,
+                value: parseFloat(data.value),
+                timeWindow: data.timeWindow
+            };
+
+            const alertData = {
+                dataSourceId: data.dataSourceId,
+                type: data.type,
+                title: data.title.trim(),
+                message: data.message.trim(),
+                severity: data.severity,
+                condition
+            };
+
+            await onSubmit(alertData);
+
+            reset();
+            setConditionData({
+                metric: '',
+                operator: 'greater_than',
+                value: '',
+                timeWindow: '1h'
+            });
+        } catch (error) {
+            dispatch(setError('Failed to create alert. Please try again.'));
+            console.error('Error creating alert:', error);
+        } finally {
+            dispatch(setLoading(false));
+        }
     };
 
     const handleCancel = () => {
@@ -58,6 +101,11 @@ const AlertForm = ({ onSubmit, onCancel }) => {
 
     return (
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+            {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                    {error}
+                </div>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label className="label">Alert Title</label>
@@ -128,12 +176,14 @@ const AlertForm = ({ onSubmit, onCancel }) => {
                             required: 'Please select a data source'
                         })}
                         className="input"
+                        disabled={isLoading}
                     >
-                        <option value="">Select data source</option>
-                        {/* In a real app, this would be populated from API */}
-                        <option value="sales-ds">Sales Data</option>
-                        <option value="inventory-ds">Inventory Data</option>
-                        <option value="feedback-ds">Customer Feedback</option>
+                        <option value="">{isLoading ? 'Loading data sources...' : 'Select data source'}</option>
+                        {dataSources.map((dataSource) => (
+                            <option key={dataSource.id} value={dataSource.id}>
+                                {dataSource.name} ({dataSource.type})
+                            </option>
+                        ))}
                     </select>
                     {errors.dataSourceId && (
                         <p className="error-message">{errors.dataSourceId.message}</p>
@@ -201,10 +251,15 @@ const AlertForm = ({ onSubmit, onCancel }) => {
                             <input
                                 {...register('value', {
                                     required: 'Value is required',
-                                    valueAsNumber: true
+                                    valueAsNumber: true,
+                                    min: {
+                                        value: 0,
+                                        message: 'Value must be greater than or equal to 0'
+                                    }
                                 })}
                                 type="number"
                                 step="0.01"
+                                min="0"
                                 className="input"
                                 placeholder="Enter threshold value"
                             />
@@ -242,8 +297,9 @@ const AlertForm = ({ onSubmit, onCancel }) => {
                 <button
                     type="submit"
                     className="btn btn-primary"
+                    disabled={isLoading}
                 >
-                    Create Alert
+                    {isLoading ? 'Creating...' : 'Create Alert'}
                 </button>
             </div>
         </form>

@@ -46,7 +46,7 @@ const InventoryChart = ({ data = [], onDrillDown, timeRange = '7d' }) => {
 
         setDrillDownData(drillDown);
         setIsDrilledDown(true);
-        setDrillDownTitle(`${clickedData.name} - Inventory History`);
+        setDrillDownTitle(`${clickedData.name || 'Selected Product'} - Inventory History`);
     };
 
     const handleBack = () => {

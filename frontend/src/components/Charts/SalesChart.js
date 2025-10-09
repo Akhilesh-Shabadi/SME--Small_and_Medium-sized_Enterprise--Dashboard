@@ -28,19 +28,25 @@ const SalesChart = ({ data = [], onDrillDown, timeRange = '7d' }) => {
 
             return Array.from({ length: days }, (_, i) => {
                 let date, name;
-                if (isHourly) {
-                    date = new Date(Date.now() - (days - 1 - i) * 60 * 60 * 1000);
-                    name = format(date, 'HH:mm');
-                } else if (isMonthly) {
-                    date = subDays(new Date(), (days - 1 - i) * 30);
-                    name = format(date, 'MMM yyyy');
-                } else {
-                    date = subDays(new Date(), days - 1 - i);
-                    name = format(date, 'MMM dd');
+                try {
+                    if (isHourly) {
+                        date = new Date(Date.now() - (days - 1 - i) * 60 * 60 * 1000);
+                        name = format(date, 'HH:mm');
+                    } else if (isMonthly) {
+                        date = subDays(new Date(), (days - 1 - i) * 30);
+                        name = format(date, 'MMM yyyy');
+                    } else {
+                        date = subDays(new Date(), days - 1 - i);
+                        name = format(date, 'MMM dd');
+                    }
+                } catch (error) {
+                    // Fallback if date formatting fails
+                    date = new Date();
+                    name = `Day ${i + 1}`;
                 }
 
                 return {
-                    name,
+                    name: name || `Day ${i + 1}`,
                     value: Math.floor(Math.random() * 1000) + 500,
                     date: date.toISOString(),
                     category: 'All Products'
@@ -58,7 +64,7 @@ const SalesChart = ({ data = [], onDrillDown, timeRange = '7d' }) => {
 
         setDrillDownData(drillDown);
         setIsDrilledDown(true);
-        setDrillDownTitle(`${clickedData.name} - Product Breakdown`);
+        setDrillDownTitle(`${clickedData.name || 'Selected Date'} - Product Breakdown`);
     };
 
     const handleBack = () => {

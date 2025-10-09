@@ -1,11 +1,16 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import AlertManager from '../../components/Alerts/AlertManager';
+import NotificationCenter from '../../components/Alerts/NotificationCenter';
+import AlertSettings from '../../components/Alerts/AlertSettings';
 import { addAlert, addNotification } from '../../store/slices/alertSlice';
 
 const Alerts = () => {
     const dispatch = useDispatch();
     const { alerts, notifications } = useSelector((state) => state.alert);
+    const [showNotificationCenter, setShowNotificationCenter] = useState(false);
+    const [showAlertSettings, setShowAlertSettings] = useState(false);
+    const [showCreateAlert, setShowCreateAlert] = useState(false);
 
     useEffect(() => {
         // Simulate some sample alerts for demonstration
@@ -112,13 +117,22 @@ const Alerts = () => {
                     <div className="card mt-6">
                         <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
                         <div className="space-y-2">
-                            <button className="w-full btn btn-primary text-sm">
+                            <button
+                                onClick={() => setShowCreateAlert(true)}
+                                className="w-full btn btn-primary text-sm"
+                            >
                                 Create New Alert
                             </button>
-                            <button className="w-full btn btn-outline text-sm">
+                            <button
+                                onClick={() => setShowNotificationCenter(true)}
+                                className="w-full btn btn-outline text-sm"
+                            >
                                 View All Notifications
                             </button>
-                            <button className="w-full btn btn-outline text-sm">
+                            <button
+                                onClick={() => setShowAlertSettings(true)}
+                                className="w-full btn btn-outline text-sm"
+                            >
                                 Alert Settings
                             </button>
                         </div>
@@ -127,7 +141,10 @@ const Alerts = () => {
 
                 {/* Alert Manager */}
                 <div className="lg:col-span-2">
-                    <AlertManager />
+                    <AlertManager
+                        showCreateAlert={showCreateAlert}
+                        onCloseCreateAlert={() => setShowCreateAlert(false)}
+                    />
                 </div>
             </div>
 
@@ -165,6 +182,17 @@ const Alerts = () => {
                     )}
                 </div>
             </div>
+
+            {/* Modals */}
+            <NotificationCenter
+                isOpen={showNotificationCenter}
+                onClose={() => setShowNotificationCenter(false)}
+            />
+
+            <AlertSettings
+                isOpen={showAlertSettings}
+                onClose={() => setShowAlertSettings(false)}
+            />
         </div>
     );
 };
