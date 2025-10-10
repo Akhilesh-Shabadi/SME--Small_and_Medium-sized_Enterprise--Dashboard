@@ -97,6 +97,69 @@ export const alertService = {
             console.error('Error fetching data sources:', error);
             throw error;
         }
+    },
+
+    // Notification API functions
+    // Get notifications for user
+    getNotifications: async (filters = {}) => {
+        try {
+            const params = new URLSearchParams();
+
+            if (filters.isRead !== undefined) params.append('isRead', filters.isRead);
+            if (filters.type) params.append('type', filters.type);
+            if (filters.page) params.append('page', filters.page);
+            if (filters.limit) params.append('limit', filters.limit);
+
+            const response = await api.get(`/notifications?${params.toString()}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
+            throw error;
+        }
+    },
+
+    // Mark notification as read
+    markNotificationAsRead: async (notificationId) => {
+        try {
+            const response = await api.put(`/notifications/${notificationId}/read`);
+            return response.data;
+        } catch (error) {
+            console.error('Error marking notification as read:', error);
+            throw error;
+        }
+    },
+
+    // Mark all notifications as read
+    markAllNotificationsAsRead: async () => {
+        try {
+            const response = await api.put('/notifications/read-all');
+            return response.data;
+        } catch (error) {
+            console.error('Error marking all notifications as read:', error);
+            throw error;
+        }
+    },
+
+    // Delete notification
+    deleteNotification: async (notificationId) => {
+        try {
+            const response = await api.delete(`/notifications/${notificationId}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error deleting notification:', error);
+            throw error;
+        }
+    },
+
+    // Get notification statistics
+    getNotificationStatistics: async () => {
+        try {
+            const response = await api.get('/notifications/statistics');
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching notification statistics:', error);
+            throw error;
+        }
     }
 };
 

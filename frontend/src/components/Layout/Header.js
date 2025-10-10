@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -10,6 +10,7 @@ import {
 import { toggleSidebar } from '../../store/slices/uiSlice';
 import { logout } from '../../store/slices/authSlice';
 import { useSocket } from '../../contexts/SocketContext';
+import NotificationCenter from '../Alerts/NotificationCenter';
 
 const Header = () => {
     const dispatch = useDispatch();
@@ -17,10 +18,19 @@ const Header = () => {
     const { user } = useSelector((state) => state.auth);
     const { unreadCount } = useSelector((state) => state.alert);
     const { isConnected } = useSocket();
+    const [isNotificationCenterOpen, setIsNotificationCenterOpen] = useState(false);
 
     const handleLogout = () => {
         dispatch(logout());
         navigate('/login');
+    };
+
+    const handleNotificationClick = () => {
+        setIsNotificationCenterOpen(true);
+    };
+
+    const handleCloseNotificationCenter = () => {
+        setIsNotificationCenterOpen(false);
     };
 
     return (
@@ -44,7 +54,10 @@ const Header = () => {
 
                 <div className="flex items-center space-x-4">
                     {/* Notifications */}
-                    <button className="relative p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-md">
+                    <button
+                        onClick={handleNotificationClick}
+                        className="relative p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-md"
+                    >
                         <BellIcon className="h-6 w-6" />
                         {unreadCount > 0 && (
                             <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
@@ -79,6 +92,12 @@ const Header = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Notification Center */}
+            <NotificationCenter
+                isOpen={isNotificationCenterOpen}
+                onClose={handleCloseNotificationCenter}
+            />
         </header>
     );
 };

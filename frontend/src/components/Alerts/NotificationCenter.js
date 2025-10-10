@@ -10,7 +10,7 @@ import {
     ExclamationCircleIcon,
     XCircleIcon
 } from '@heroicons/react/24/outline';
-import { markNotificationAsRead, markAllNotificationsAsRead } from '../../store/slices/alertSlice';
+import { markNotificationAsReadAsync, markAllNotificationsAsReadAsync } from '../../store/slices/alertSlice';
 
 const NotificationCenter = ({ isOpen, onClose }) => {
     const dispatch = useDispatch();
@@ -44,11 +44,11 @@ const NotificationCenter = ({ isOpen, onClose }) => {
     });
 
     const handleMarkAsRead = (notificationId) => {
-        dispatch(markNotificationAsRead(notificationId));
+        dispatch(markNotificationAsReadAsync(notificationId));
     };
 
     const handleMarkAllAsRead = () => {
-        dispatch(markAllNotificationsAsRead());
+        dispatch(markAllNotificationsAsReadAsync());
     };
 
     const handleNotificationClick = (notification) => {
@@ -94,8 +94,8 @@ const NotificationCenter = ({ isOpen, onClose }) => {
                             <button
                                 onClick={() => setFilter('all')}
                                 className={`px-3 py-1 text-sm rounded-full ${filter === 'all'
-                                        ? 'bg-blue-100 text-blue-800'
-                                        : 'text-gray-600 hover:bg-gray-100'
+                                    ? 'bg-blue-100 text-blue-800'
+                                    : 'text-gray-600 hover:bg-gray-100'
                                     }`}
                             >
                                 All
@@ -103,8 +103,8 @@ const NotificationCenter = ({ isOpen, onClose }) => {
                             <button
                                 onClick={() => setFilter('unread')}
                                 className={`px-3 py-1 text-sm rounded-full ${filter === 'unread'
-                                        ? 'bg-blue-100 text-blue-800'
-                                        : 'text-gray-600 hover:bg-gray-100'
+                                    ? 'bg-blue-100 text-blue-800'
+                                    : 'text-gray-600 hover:bg-gray-100'
                                     }`}
                             >
                                 Unread
@@ -112,8 +112,8 @@ const NotificationCenter = ({ isOpen, onClose }) => {
                             <button
                                 onClick={() => setFilter('read')}
                                 className={`px-3 py-1 text-sm rounded-full ${filter === 'read'
-                                        ? 'bg-blue-100 text-blue-800'
-                                        : 'text-gray-600 hover:bg-gray-100'
+                                    ? 'bg-blue-100 text-blue-800'
+                                    : 'text-gray-600 hover:bg-gray-100'
                                     }`}
                             >
                                 Read

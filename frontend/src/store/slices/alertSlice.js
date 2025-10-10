@@ -1,4 +1,42 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { alertService } from '../../services/alertService';
+
+// Async thunks
+export const fetchNotifications = createAsyncThunk(
+    'alert/fetchNotifications',
+    async (filters = {}, { rejectWithValue }) => {
+        try {
+            const response = await alertService.getNotifications(filters);
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Failed to fetch notifications');
+        }
+    }
+);
+
+export const markNotificationAsReadAsync = createAsyncThunk(
+    'alert/markNotificationAsReadAsync',
+    async (notificationId, { rejectWithValue }) => {
+        try {
+            const response = await alertService.markNotificationAsRead(notificationId);
+            return { notificationId, response: response.data };
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Failed to mark notification as read');
+        }
+    }
+);
+
+export const markAllNotificationsAsReadAsync = createAsyncThunk(
+    'alert/markAllNotificationsAsReadAsync',
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await alertService.markAllNotificationsAsRead();
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Failed to mark all notifications as read');
+        }
+    }
+);
 
 const initialState = {
     alerts: [],
@@ -59,6 +97,38 @@ const alertSlice = createSlice({
         clearError: (state) => {
             state.error = null;
         },
+    },
+    extraReducers: (builder) => {
+        builder
+            // Fetch notifications
+            .addCase(fetchNotifications.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(fetchNotifications.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.notifications = action.payload.notifications || [];
+                state.unreadCount = action.payload.notifications?.filter(n => !n.isRead).length || 0;
+            })
+            .addCase(fetchNotifications.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload;
+            })
+            // Mark notification as read
+            .addCase(markNotificationAsReadAsync.fulfilled, (state, action) => {
+                const notification = state.notifications.find(n => n.id === action.payload.notificationId);
+                if (notification && !notification.isRead) {
+                    notification.isRead = true;
+                    state.unreadCount = Math.max(0, state.unreadCount - 1);
+                }
+            })
+            // Mark all notifications as read
+            .addCase(markAllNotificationsAsReadAsync.fulfilled, (state) => {
+                state.notifications.forEach(notification => {
+                    notification.isRead = true;
+                });
+                state.unreadCount = 0;
+            });
     },
 });
 
